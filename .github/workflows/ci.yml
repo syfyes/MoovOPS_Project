@@ -1,0 +1,27 @@
+name: MoovOPS Continuous Integration
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test-application:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: ⬇️ Récupération du code source
+      uses: actions/checkout@v3
+
+    - name: 🟢 Configuration de l'environnement Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+        cache: 'npm'
+
+    - name: 📦 Installation des dépendances du projet
+      run: npm install
+
+    - name: 🧪 Exécution des tests unitaires Jest
+      run: npm test

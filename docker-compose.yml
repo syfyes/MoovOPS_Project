@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  # Base de données MySQL isolée (aucun port exposé vers l'extérieur !)
+  moovops-db:
+    image: mysql:8.0
+    container_name: moovops-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root_secure_password
+      MYSQL_DATABASE: moovops
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - moovops-net
+
+  # phpMyAdmin accessible sur le port 8081
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: moovops-pma
+    environment:
+      PMA_HOST: moovops-db
+    ports:
+      - "8081:80"
+    depends_on:
+      - moovops-db
+    networks:
+      - moovops-net
+
+  # Conteneur applicatif Node.js (Palier 2)
+  moovops-app:
+    build: .
+    container_name: moovops-app
+    restart: always
+    depends_on:
+      - moovops-db
+    networks:
+      - moovops-net
+
+  # Outil BI Metabase sur le port 3000 (Palier 2)
+  metabase:
+    image: metabase/metabase:latest
+    container_name: moovops-metabase
+    ports:
+      - "3000:3000"
+    volumes:
+      - metabase_data:/metabase-data
+    depends_on:
+      - moovops-db
+    networks:
+      - moovops-net
+
+volumes:
+  mysql_data:
+  metabase_data:
+
+networks:
+  moovops-net:
+    driver: bridge
