@@ -99,3 +99,4 @@ cron.schedule('*/10 * * * *', () => {
     console.log("⏰ Déclenchement automatique du cycle périodique (Intervalle 10 min)...");
     executePipeline();
 });
+
