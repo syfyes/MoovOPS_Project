@@ -24,3 +24,4 @@ describe('--- Suite de Tests Unitaires MoovOPS (Palier 3) ---', () => {
         expect(resultat).toBeNull(); // Doit être ignoré (Palier 1/3)
     });
 });
+
