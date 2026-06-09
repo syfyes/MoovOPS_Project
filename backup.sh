@@ -22,3 +22,4 @@ echo "🧹 Nettoyage automatique : Suppression des sauvegardes vieilles de plus 
 find $BACKUP_DIR -name "*.sql.gz" -mtime +3 -exec rm {} \;
 
 echo "✅ Process de sauvegarde terminé avec succès !"
+
