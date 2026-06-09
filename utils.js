@@ -26,3 +26,4 @@ function validerEtNettoyerDonnees(station, temperature) {
 }
 
 module.exports = { validerEtNettoyerDonnees };
+
