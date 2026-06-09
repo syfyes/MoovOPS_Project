@@ -1,0 +1,219 @@
+# MoovOPS - Data Pipeline
+
+## Description
+
+Pipeline DataOps en Node.js permettant de collecter, transformer et stocker des données issues de deux APIs :
+- CityBikes (stations Vélib)
+- Open-Meteo (température)
+
+Le pipeline est conçu pour être automatisé, idempotent et conteneurisé.
+
+---
+
+## Stack technique
+
+- Node.js
+- MySQL
+- Docker / Docker Compose
+- Jest
+- GitHub Actions
+- Bash
+
+---
+
+## Structure du projet
+
+MoovOPS_Project/
+├── pipeline.js
+├── utils.js
+├── pipeline.test.js
+├── Dockerfile
+├── docker-compose.yml
+├── backup.sh
+├── package.json
+└── .github/workflows/ci.yml
+
+---
+
+## Pipeline
+
+Le fichier `pipeline.js` est le point d’entrée principal.
+
+### Étapes
+
+1. Appel des APIs
+- appel simultané via Promise.all()
+- récupération stations + météo
+
+2. Transformation
+- filtrage des stations (exclusion vélos = 0)
+- extraction des champs utiles :
+  - id
+  - nom
+  - latitude
+  - longitude
+  - vélos disponibles
+  - température
+
+3. Insertion en base
+- insertion dans MySQL
+- utilisation de INSERT IGNORE pour éviter les doublons
+
+4. Boucle
+- exécution périodique (~10 min)
+- pipeline continu
+
+---
+
+## utils.js
+
+Contient les fonctions métier :
+
+- appels API
+- nettoyage des données
+- transformation
+- helpers
+
+Permet de séparer la logique du pipeline principal.
+
+---
+
+## Base de données
+
+### Tables
+
+stations
+- id (PK)
+- nom
+- latitude
+- longitude
+
+historique_dispo
+- id_station (FK)
+- velos_dispo
+- temperature
+- date
+
+---
+
+## Concepts implémentés
+
+- normalisation des données
+- séparation statique / dynamique
+- historisation
+- idempotence
+
+---
+
+## Connexion MySQL
+
+- utilisateur : moov_worker
+- droits restreints
+- utilisé par le pipeline
+
+---
+
+## Tests
+
+Fichier : pipeline.test.js
+
+Framework : Jest
+
+Tests :
+- coordonnées valides (latitude / longitude)
+- température cohérente (-20 à 50)
+- absence de doublons (idempotence)
+
+---
+
+## Docker
+
+### Dockerfile
+
+Image :
+- node:18
+
+Étapes :
+- copie du projet
+- installation dépendances
+- lancement pipeline
+
+CMD ["node", "pipeline.js"]
+
+---
+
+## Docker Compose
+
+Services :
+- app (Node.js)
+- mysql
+- metabase (optionnel)
+
+Caractéristiques :
+- réseau privé Docker
+- communication interne
+- base non exposée
+
+---
+
+## CI/CD
+
+Fichier :
+.github/workflows/ci.yml
+
+Fonctionnement :
+- déclenché à chaque push
+- installe dépendances
+- lance les tests
+
+---
+
+## Backup
+
+Fichier :
+backup.sh
+
+Fonctions :
+- dump MySQL avec mysqldump
+- fichiers horodatés
+
+---
+
+## Lancement
+
+Docker :
+
+docker-compose up --build
+
+---
+
+Local :
+
+npm install
+node pipeline.js
+
+---
+
+Tests :
+
+npm test
+
+---
+
+## Caractéristiques
+
+- pipeline idempotent
+- traitement asynchrone
+- architecture modulaire
+- automatisation complète
+- conteneurisation
+
+---
+
+## Améliorations
+
+- retry API
+- logs avancés
+- compression des backups
+- purge automatique
+- scalabilité
